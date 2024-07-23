@@ -1,5 +1,5 @@
 package org.example;
-
+import org.apache.commons.cli.*;
 import java.io.*;
 
 public class Main {
@@ -62,13 +62,53 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
+        final Options options = getOptions();
+
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;
+
         try {
-            Main.readFile("src/test/resources/in1.txt", "", "src/test/resources", true);
-            Main.readFile("src/test/resources/in2.txt", "", "src/test/resources", true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("utility-name", options);
+            System.exit(1);
         }
+
+        String filePrefix = cmd.getOptionValue("prefix");
+        String outputFilePath = cmd.getOptionValue("output");
+        if (cmd.hasOption("statistics")) {
+            System.out.println("Need statistics");
+        }
+        if (cmd.hasOption("fullStatistics")) {
+            System.out.println("Need full statistics");
+        }
+        System.out.println(filePrefix);
+        System.out.println(outputFilePath);
+    }
+
+    private static Options getOptions() {
+        Options options = new Options();
+
+        Option prefix = new Option("p", "prefix", true, "output file prefix");
+        prefix.setRequired(false);
+        options.addOption(prefix);
+
+        Option output = new Option("o", "output", true, "output file path");
+        output.setRequired(false);
+        options.addOption(output);
+
+        Option statistics = new Option("s", "statistics", false, "statistics about files");
+        statistics.setRequired(false);
+        options.addOption(statistics);
+
+        Option fullStatistics = new Option("f", "fullStatistics", false, "full statistics about files");
+        fullStatistics.setRequired(false);
+        options.addOption(fullStatistics);
+        return options;
     }
 
 
