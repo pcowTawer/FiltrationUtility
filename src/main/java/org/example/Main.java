@@ -11,7 +11,7 @@ public class Main {
         writer.close();
     }
 
-    private static void readData(String filePath, String fileNamePrefix, String writePath, Boolean isAppending)
+    private static void readData(String filePath, String filePrefix, String outputPath, Boolean isAppending)
             throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
         String line;
@@ -35,40 +35,39 @@ public class Main {
         }
         br.close();
 
-        writeFile(integers.toString(), writePath+"/"+fileNamePrefix +"integers.txt", isAppending);
-        writeFile(floats.toString(), writePath+"/"+fileNamePrefix+"floats.txt", isAppending);
-        writeFile(strings.toString(), writePath +"/"+fileNamePrefix+"strings.txt", isAppending);
+        writeFile(integers.toString(), outputPath+"/"+filePrefix +"integers.txt", isAppending);
+        writeFile(floats.toString(), outputPath+"/"+filePrefix+"floats.txt", isAppending);
+        writeFile(strings.toString(), outputPath +"/"+filePrefix+"strings.txt", isAppending);
     }
 
     public static void main(String[] args) {
 
-//        final Options options = getOptions();
-//
-//        CommandLineParser parser = new DefaultParser();
-//        HelpFormatter formatter = new HelpFormatter();
-//        CommandLine cmd = null;
-//
-//        try {
-//            cmd = parser.parse(options, args);
-//        } catch (ParseException e) {
-//            System.out.println(e.getMessage());
-//            formatter.printHelp("utility-name", options);
-//            System.exit(1);
-//        }
-//
-//        String filePrefix = cmd.getOptionValue("prefix");
-//        String outputFilePath = cmd.getOptionValue("output");
-//        if (cmd.hasOption("statistics")) {
-//            System.out.println("Need statistics");
-//        }
-//        if (cmd.hasOption("fullStatistics")) {
-//            System.out.println("Need full statistics");
-//        }
+        final Options options = getOptions();
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;
+
         try {
-            readData("src/test/resources/in1.txt", "", "src/test/resources", false);
-            readData("src/test/resources/in2.txt", "", "src/test/resources", true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("utility-name", options);
+            System.exit(1);
+        }
+
+        String filePrefix = cmd.getOptionValue("prefix");
+        String outputPath = cmd.getOptionValue("output");
+        cmd.hasOption("statistics");                            //TODO: Realise statistics function
+        cmd.hasOption("fullStatistics");                        //TODO: Realise fullStatistics function
+        Boolean isAppending = cmd.hasOption("a");
+        String[] filePaths = cmd.getArgs();
+
+        for (String filePath: filePaths) {
+            try {
+                readData(filePath, filePrefix, outputPath, isAppending);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -76,20 +75,20 @@ public class Main {
         Options options = new Options();
 
         Option prefix = new Option("p", "prefix", true, "output file prefix");
-        prefix.setRequired(false);
         options.addOption(prefix);
 
         Option output = new Option("o", "output", true, "output file path");
-        output.setRequired(false);
         options.addOption(output);
 
         Option statistics = new Option("s", "statistics", false, "statistics about files");
-        statistics.setRequired(false);
         options.addOption(statistics);
 
         Option fullStatistics = new Option("f", "fullStatistics", false, "full statistics about files");
-        fullStatistics.setRequired(false);
         options.addOption(fullStatistics);
+
+        Option append = new Option("a", "append", false, "append to file");
+        options.addOption(append);
+
         return options;
     }
 
