@@ -3,91 +3,73 @@ import org.apache.commons.cli.*;
 import java.io.*;
 
 public class Main {
-    private static void readFile(String filePath, String fileNamePrefix, String writePath, Boolean isAppending)
+    private static void writeFile(String str, String filePath, Boolean isAppending)
+            throws IOException {
+        if (str.isEmpty()) return;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, isAppending));
+        writer.write(str);
+        writer.close();
+    }
+
+    private static void readData(String filePath, String fileNamePrefix, String writePath, Boolean isAppending)
             throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
-        String line = null;
-        String integers = "";
-        String floats = "";
-        String strings = "";
+        String line;
+        StringBuilder integers = new StringBuilder();
+        StringBuilder floats = new StringBuilder();
+        StringBuilder strings = new StringBuilder();
         while ((line = br.readLine()) != null) {
             try {
-                long foo = Long.parseLong(line);
-                integers += line + "\n";
+                Long.parseLong(line);
+                integers.append(line).append("\n");
                 continue;
             }
             catch (NumberFormatException ignored) {}
             try {
-                double foo = Double.parseDouble(line);
-                floats += line + "\n";
+                Double.parseDouble(line);
+                floats.append(line).append("\n");
                 continue;
             }
             catch (NumberFormatException ignored) {}
-            strings += line + "\n";
+            strings.append(line).append(line.isEmpty() ? "" : "\n");
         }
         br.close();
 
-        System.out.println("Integers:\n" + integers);
-        if (!integers.isEmpty()) {
-            BufferedWriter integersWriter = new BufferedWriter(
-                    new FileWriter(writePath + "/" + fileNamePrefix + "integers", true));
-            if (isAppending) {
-                integersWriter.append(integers);
-            } else {
-                integersWriter.write(integers);
-            }
-            integersWriter.close();
-        }
-        System.out.println("Floats:\n" + floats);
-        if (!floats.isEmpty()) {
-            BufferedWriter floatsWriter = new BufferedWriter(
-                    new FileWriter(writePath + "/" + fileNamePrefix + "floats", true));
-            if (isAppending) {
-                floatsWriter.append(floats);
-            } else {
-                floatsWriter.write(floats);
-            }
-            floatsWriter.close();
-        }
-        System.out.println("String:\n" + floats);
-        if (!strings.isEmpty()) {
-            BufferedWriter stringsWriter = new BufferedWriter(
-                    new FileWriter(writePath + "/" + fileNamePrefix + "strings", true));
-            if (isAppending) {
-                stringsWriter.append(strings);
-            } else {
-                stringsWriter.write(strings);
-            }
-            stringsWriter.close();
-        }
+        writeFile(integers.toString(), writePath+"/"+fileNamePrefix +"integers.txt", isAppending);
+        writeFile(floats.toString(), writePath+"/"+fileNamePrefix+"floats.txt", isAppending);
+        writeFile(strings.toString(), writePath +"/"+fileNamePrefix+"strings.txt", isAppending);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
-        final Options options = getOptions();
-
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd = null;
-
+//        final Options options = getOptions();
+//
+//        CommandLineParser parser = new DefaultParser();
+//        HelpFormatter formatter = new HelpFormatter();
+//        CommandLine cmd = null;
+//
+//        try {
+//            cmd = parser.parse(options, args);
+//        } catch (ParseException e) {
+//            System.out.println(e.getMessage());
+//            formatter.printHelp("utility-name", options);
+//            System.exit(1);
+//        }
+//
+//        String filePrefix = cmd.getOptionValue("prefix");
+//        String outputFilePath = cmd.getOptionValue("output");
+//        if (cmd.hasOption("statistics")) {
+//            System.out.println("Need statistics");
+//        }
+//        if (cmd.hasOption("fullStatistics")) {
+//            System.out.println("Need full statistics");
+//        }
         try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("utility-name", options);
-            System.exit(1);
+            readData("src/test/resources/in1.txt", "", "src/test/resources", false);
+            readData("src/test/resources/in2.txt", "", "src/test/resources", true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        String filePrefix = cmd.getOptionValue("prefix");
-        String outputFilePath = cmd.getOptionValue("output");
-        if (cmd.hasOption("statistics")) {
-            System.out.println("Need statistics");
-        }
-        if (cmd.hasOption("fullStatistics")) {
-            System.out.println("Need full statistics");
-        }
-        System.out.println(filePrefix);
-        System.out.println(outputFilePath);
     }
 
     private static Options getOptions() {
