@@ -11,7 +11,7 @@ public class Main {
         writer.close();
     }
 
-    private static void readData(String filePath, String filePrefix, String outputPath, Boolean isAppending)
+    private static void filter(String filePath, String filePrefix, String outputPath, Boolean isAppending)
             throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
         String line;
@@ -40,7 +40,7 @@ public class Main {
         writeFile(strings.toString(), outputPath +"/"+filePrefix+"strings.txt", isAppending);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         final Options options = getOptions();
         CommandLineParser parser = new DefaultParser();
@@ -57,18 +57,17 @@ public class Main {
 
         String filePrefix = cmd.getOptionValue("prefix");
         String outputPath = cmd.getOptionValue("output");
-        cmd.hasOption("statistics");                            //TODO: Realise statistics function
-        cmd.hasOption("fullStatistics");                        //TODO: Realise fullStatistics function
-        Boolean isAppending = cmd.hasOption("a");
         String[] filePaths = cmd.getArgs();
 
         for (String filePath: filePaths) {
             try {
-                readData(filePath, filePrefix, outputPath, isAppending);
+                filter(filePath, filePrefix, outputPath, cmd.hasOption("append"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+        if (cmd.hasOption("statistics")) getStatistics(outputPath+"/"+filePrefix);
+        cmd.hasOption("fullStatistics");// TODO: getFullStatistics(outputPath+"/"+filePrefix);
     }
 
     private static Options getOptions() {
@@ -90,6 +89,20 @@ public class Main {
         options.addOption(append);
 
         return options;
+    }
+
+    private static void getStatistics(String fileFullPrefix) throws IOException {
+        System.out.println("Integers count: " + getFileLinesCount(fileFullPrefix+"integers.txt"));
+        System.out.println("Floats count: " + getFileLinesCount(fileFullPrefix+"floats.txt"));
+        System.out.println("Strings count: " + getFileLinesCount(fileFullPrefix+"strings.txt"));
+    }
+
+    private static int getFileLinesCount(String filePath) throws IOException{
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        int lines = 0;
+        while (reader.readLine() != null) lines++;
+        reader.close();
+        return lines;
     }
 
 
