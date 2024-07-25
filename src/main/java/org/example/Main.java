@@ -7,14 +7,26 @@ public class Main {
     private static void writeFile(String str, String filePath, Boolean isAppending)
             throws IOException {
         if (str.isEmpty()) return;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, isAppending));
+        BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(filePath, isAppending));
+        } catch (IOException e) {
+            System.out.println("Can't write file by path " + filePath);
+            return;
+        }
         writer.write(str);
         writer.close();
     }
 
     private static void filter(String filePath, String filePrefix, String outputPath, Boolean isAppending)
             throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(filePath));
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(filePath));
+        } catch (FileNotFoundException e) {
+            System.out.println("File " + filePath + " not found. ");
+            return;
+        }
         String line;
         StringBuilder integers = new StringBuilder();
         StringBuilder floats = new StringBuilder();
@@ -63,9 +75,7 @@ public class Main {
         for (String filePath: filePaths) {
             try {
                 filter(filePath, filePrefix, outputPath, cmd.hasOption("append"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            } catch (IOException ignored) {}
         }
         if (cmd.hasOption("statistics")) getStatistics(outputPath+"/"+filePrefix);
         if (cmd.hasOption("fullStatistics")) getFullStatistics(outputPath+"/"+filePrefix);
